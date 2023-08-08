@@ -1,7 +1,7 @@
 ﻿[*.cs]
 
 # SA1204: Static elements must appear before instance elements
-dotnet_diagnostic.SA1204.severity = silent
+dotnet_diagnostic.SA1204.severity = none
 
 # SA1201: Elements must appear in the correct order
 dotnet_diagnostic.SA1201.severity = silent
@@ -40,10 +40,13 @@ dotnet_diagnostic.SA1611.severity = silent
 dotnet_diagnostic.SA1009.severity = silent
 
 # SA1214: Readonly fields must appear before non-readonly fields
-dotnet_diagnostic.SA1214.severity = silent
+dotnet_diagnostic.SA1214.severity = none
 
-# IDE0052: 删除未读的私有成员
-dotnet_diagnostic.IDE0052.severity = none
+# SA1604: Element documentation must have summary
+dotnet_diagnostic.SA1604.severity = none
 
-# Default severity for analyzer diagnostics with category 'CodeQuality'
-dotnet_analyzer_diagnostic.category-CodeQuality.severity = none
+# CS0252: 可能非有意的引用比较；左侧需要强制转换
+dotnet_diagnostic.CS0252.severity = none
+
+# Default severity for all analyzer diagnostics
+dotnet_analyzer_diagnostic.severity = none

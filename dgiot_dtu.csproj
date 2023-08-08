@@ -46,6 +46,9 @@
       <HintPath>packages\Portable.BouncyCastle.1.8.1.2\lib\net4\BouncyCastle.Crypto.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="CodeLib">
+      <HintPath>lib\CodeLib.dll</HintPath>
+    </Reference>
     <Reference Include="Common.Logging, Version=3.4.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
       <HintPath>packages\Common.Logging.3.4.1\lib\net40\Common.Logging.dll</HintPath>
       <Private>True</Private>
@@ -63,6 +66,9 @@
     </Reference>
     <Reference Include="LiteNetLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\LiteNetLib.0.9.5.2\lib\net35\LiteNetLib.dll</HintPath>
+    </Reference>
+    <Reference Include="LitJSON, Version=0.18.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\LitJson.0.18.0\lib\net45\LitJSON.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
@@ -101,23 +107,20 @@
     <Reference Include="PacketDotNet, Version=0.13.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\PacketDotNet.0.13.0\lib\net\PacketDotNet.dll</HintPath>
     </Reference>
+    <Reference Include="PLCComHelperProj">
+      <HintPath>lib\PLCComHelperProj.dll</HintPath>
+    </Reference>
     <Reference Include="SharpPcap, Version=4.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\SharpPcap.4.2.0\lib\net\SharpPcap.dll</HintPath>
     </Reference>
-    <Reference Include="SuperSocket.Common, Version=1.6.6.1, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
-      <HintPath>packages\SuperSocket.1.6.6.1\lib\net45\SuperSocket.Common.dll</HintPath>
+    <Reference Include="Spire.Doc">
+      <HintPath>lib\Spire.Doc.dll</HintPath>
     </Reference>
-    <Reference Include="SuperSocket.Facility, Version=1.6.6.1, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
-      <HintPath>packages\SuperSocket.1.6.6.1\lib\net45\SuperSocket.Facility.dll</HintPath>
+    <Reference Include="Spire.License">
+      <HintPath>lib\Spire.License.dll</HintPath>
     </Reference>
-    <Reference Include="SuperSocket.SocketBase, Version=1.6.6.1, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
-      <HintPath>packages\SuperSocket.1.6.6.1\lib\net45\SuperSocket.SocketBase.dll</HintPath>
-    </Reference>
-    <Reference Include="SuperSocket.SocketEngine, Version=1.6.6.1, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
-      <HintPath>packages\SuperSocket.Engine.1.6.6.1\lib\net45\SuperSocket.SocketEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="SuperSocket.SocketService, Version=1.6.6.1, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
-      <HintPath>packages\SuperSocket.Engine.1.6.6.1\lib\net45\SuperSocket.SocketService.exe</HintPath>
+    <Reference Include="Spire.Pdf">
+      <HintPath>lib\Spire.Pdf.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -132,6 +135,9 @@
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.SQLite">
+      <HintPath>lib\System.Data.SQLite.dll</HintPath>
+    </Reference>
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
@@ -205,8 +211,8 @@
     <Compile Include="component\Opc\Model\Header.cs" />
     <Compile Include="component\Opc\Model\Item.cs" />
     <Compile Include="component\Opc\Model\OpcDaService.cs" />
-    <Compile Include="component\Opc\Model\ServiceCollection.cs" />
-    <Compile Include="component\Opc\Model\TreeNode.cs" />
+    <Compile Include="component\Opc\Model\HostCollection.cs" />
+    <Compile Include="component\Opc\Model\Thing.cs" />
     <Compile Include="component\Opc\OPCDAHelper.cs" />
     <Compile Include="component\Opc\OPCDaImp.cs" />
     <Compile Include="component\Opc\OPCUAHelper.cs" />
@@ -217,12 +223,15 @@
     <Compile Include="component\Opc\Protocol\StartMonitoringItemsRsp.cs" />
     <Compile Include="component\Opc\Protocol\StopMonitoringItemsReq.cs" />
     <Compile Include="component\Opc\Protocol\WriteNodesValuesReq.cs" />
-    <Compile Include="component\Opc\ReceiveFilter.cs" />
-    <Compile Include="component\Opc\ReceiveFilterFactory.cs" />
-    <Compile Include="component\Opc\SocketService.cs" />
-    <Compile Include="component\Opc\StructUtility.cs" />
+    <Compile Include="component\Opc\View\OPCDAViewHelper.cs" />
     <Compile Include="component\Plc\PLCHelper.cs" />
+    <Compile Include="component\Printer\BarCodePrinter.cs" />
+    <Compile Include="component\Printer\PdfPrinter.cs" />
+    <Compile Include="component\Printer\Knova.cs" />
+    <Compile Include="component\Printer\PrinterHelper.cs" />
     <Compile Include="component\SerialPort\SerialPortHelper.cs" />
+    <Compile Include="component\sqlite\ManagerInfoDal.cs" />
+    <Compile Include="component\sqlite\SqliteHelper.cs" />
     <Compile Include="component\Sqlserver\SqlServerHelper.cs" />
     <Compile Include="component\Tcp\TcpClientHelper.cs" />
     <Compile Include="component\Tcp\TcpServerHelper.cs" />
@@ -241,12 +250,18 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="utils\ConfigHelper.cs" />
+    <Compile Include="utils\DgiotHelper.cs" />
+    <Compile Include="utils\FileHelper.cs" />
+    <Compile Include="utils\IPScanHelper.cs" />
     <Compile Include="utils\JsonArray.cs" />
     <Compile Include="utils\JsonObject.cs" />
+    <Compile Include="utils\LogHelper.cs" />
     <Compile Include="utils\PocoJsonSerializerStrategy.cs" />
     <Compile Include="utils\ReflectionUtils.cs" />
     <Compile Include="utils\SimpleJson.cs" />
-    <Compile Include="utils\StringHelper.cs" />
+    <Compile Include="utils\TimerHelper.cs" />
+    <Compile Include="utils\TreeViewHelper.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -257,8 +272,9 @@
     </EmbeddedResource>
     <None Include=".editorconfig" />
     <None Include="app.config" />
-    <None Include="Config\log4net.config" />
-    <None Include="Config\log4net.unix.config" />
+    <None Include="FodyWeavers.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -269,12 +285,23 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="supersocket.cmd" />
-    <None Include="supersocket.sh" />
+    <None Include="README-CN.md" />
+    <None Include="README-JP.md" />
+    <None Include="README-RU.md" />
+    <None Include="README.md" />
+    <None Include="renovate.json" />
+    <None Include="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DD-All.ico" />
+    <Content Include="FodyWeavers.xml" />
+    <Content Include="lib\CodeLib.dll" />
+    <Content Include="lib\System.Data.SQLite.dll" />
+    <Content Include="lib\System.Data.SQLite.EF6.dll" />
+    <Content Include="lib\System.Data.SQLite.Linq.dll" />
+    <Content Include="opcda.txt" />
     <Content Include="Resources\bridge.jpg" />
+    <Content Include="syscfg.xml" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />

@@ -5,7 +5,6 @@
 namespace Dgiot_dtu
 {
     using System;
-    using System.Configuration;
     using System.IO;
     using System.Net.Sockets;
     using System.Threading;
@@ -19,7 +18,6 @@ namespace Dgiot_dtu
         private static TcpClient client;
         private static TcpClientHelper instance;
         private static string login = string.Empty;
-        private static MainForm mainform = null;
         private static NetworkStream stream;
         private static string server = "prod.iotn2n.com";
         private static int port;
@@ -38,12 +36,11 @@ namespace Dgiot_dtu
             return instance;
         }
 
-        public static void Start(KeyValueConfigurationCollection config, bool bAutoReconnect, MainForm mainform)
+        public static void Start()
         {
-            Config(config, mainform);
-            TcpClientHelper.mainform = mainform;
-            TcpClientHelper.bAutoReconnect = bAutoReconnect;
-            if (bIsCheck)
+            Config();
+            LogHelper.Log("TcpClient_Checked " + ConfigHelper.GetConfig("TcpClient_Checked"));
+            if (DgiotHelper.StrTobool(ConfigHelper.GetConfig("TcpClient_Checked")))
             {
                 CreateConnect();
             }
@@ -62,35 +59,19 @@ namespace Dgiot_dtu
             }
         }
 
-        public static void Config(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Config()
         {
-            if (config["tcpClientServer"] != null)
-            {
-                TcpClientHelper.server = (string)config["tcpClientServer"].Value;
-            }
-
-            if (config["tcpClientPort"] != null)
-            {
-                TcpClientHelper.port = int.Parse((string)config["tcpClientPort"].Value);
-            }
-
-            if (config["tcpClientLogin"] != null)
-            {
-                TcpClientHelper.login = config["tcpClientLogin"].Value;
-            }
-
-            if (config["tcpClientIsCheck"] != null)
-            {
-                TcpClientHelper.bIsCheck = StringHelper.StrTobool(config["tcpClientIsCheck"].Value);
-            }
-
-            TcpClientHelper.mainform = mainform;
+            server = ConfigHelper.GetConfig("DgiotSever");
+            port = int.Parse(ConfigHelper.GetConfig("DgiotPort"));
+            bAutoReconnect = DgiotHelper.StrTobool(ConfigHelper.GetConfig("ReconnectChecked"));
+            bIsCheck = DgiotHelper.StrTobool(ConfigHelper.GetConfig("TcpClient_Checked"));
+            login = ConfigHelper.GetConfig("TcpClientLogin");
         }
 
         public static void CreateConnect()
         {
-            TcpClientHelper.client = new TcpClient();
-            TcpClientHelper.client.BeginConnect(TcpClientHelper.server, TcpClientHelper.port, Connected, null);
+            client = new TcpClient();
+            client.BeginConnect(server, port, Connected, null);
         }
 
         private static void Connected(IAsyncResult result)
@@ -107,9 +88,9 @@ namespace Dgiot_dtu
 
                     byte[] data = new byte[1024];
 
-                    data = mainform.Payload(TcpClientHelper.login.ToCharArray());
+                    data = System.Text.Encoding.UTF8.GetBytes(login.ToCharArray());
 
-                    mainform.Log("S->N: tcpClient login [" + mainform.Logdata(data, 0, data.Length) + "]");
+                    LogHelper.Log("TcpClient: login [" + login + "]");
 
                     stream.Write(data, 0, data.Length);
                 }
@@ -120,7 +101,7 @@ namespace Dgiot_dtu
             }
             catch (Exception e)
             {
-                mainform.Log("Couldn't connect: " + e.Message);
+                LogHelper.Log("TcpClient Couldn't connect: " + e.Message);
                 OnConnectClosed();
             }
         }
@@ -136,7 +117,7 @@ namespace Dgiot_dtu
                 {
                     stream.BeginRead(tcpdata, 0, tcpdata.Length, Read, null);
 
-                    mainform.Log("N->S: tcpClient revc [" + mainform.Logdata(tcpdata, offset, rxbytes - offset) + "]");
+                    LogHelper.Log("TcpClient Recv: [" + LogHelper.Logdata(tcpdata, offset, rxbytes - offset) + "]");
 
                     TcpServerHelper.Write(tcpdata, offset, rxbytes - offset);
 
@@ -145,7 +126,7 @@ namespace Dgiot_dtu
 
                 if (rxbytes == 0)
                 {
-                    mainform.Log("Client closed");
+                    LogHelper.Log("TcpClient Client closed");
                     OnConnectClosed();
                 }
             }
@@ -153,15 +134,15 @@ namespace Dgiot_dtu
             {
                 if (e is ObjectDisposedException)
                 {
-                    mainform.Log("Connection closed");
+                    LogHelper.Log("TcpClient Connection closed");
                 }
                 else if (e is IOException && e.Message.Contains("closed"))
                 {
-                    mainform.Log("Connection closed");
+                    LogHelper.Log("TcpClient Connection closed");
                 }
                 else
                 {
-                    mainform.Log("Exception: " + e.Message);
+                    LogHelper.Log("TcpClient Exception: " + e.Message);
                 }
 
                 OnConnectClosed();
@@ -181,7 +162,7 @@ namespace Dgiot_dtu
             }
             catch (Exception ex)
             {
-                mainform.Log("close client:" + ex.Message);
+                LogHelper.Log("TcpClient close:" + ex.Message);
             }
 
             if (bAutoReconnect && bIsRunning)
@@ -192,7 +173,7 @@ namespace Dgiot_dtu
                 }
                 catch (Exception ex)
                 {
-                    mainform.Log("Problem reconnecting:" + ex.Message);
+                    LogHelper.Log("TcpClient Problem reconnecting:" + ex.Message);
                 }
             }
         }
@@ -203,6 +184,7 @@ namespace Dgiot_dtu
             {
                 if (stream.CanWrite)
                 {
+                    LogHelper.Log("TcpClient Send: [" + LogHelper.Logdata(data, 0, len) + "]");
                     stream.Write(data, offset, len);
                 }
             }

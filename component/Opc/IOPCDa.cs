@@ -2,31 +2,30 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System;
 using System.Collections.Generic;
-
+using System.Windows.Forms;
 using TitaniumAS.Opc.Client.Da;
 
 namespace Da
 {
     public interface IOPCDa
     {
-        string[] ScanOPCDa(string host);
+        List<string> ScanOPCDa(string host, bool isClean = true);
 
-        IList<TreeNode> GetTreeNodes(string service);
-
-        string StartMonitoringItems(string serviceProgId, List<string> itemIds, string strMd5);
+        string StartMonitoringItems(string host, string serviceProgId, TreeNode groupNode, int interval, int count);
 
         void SetItemsValueChangedCallBack(IItemsValueChangedCallBack callBack);
 
-        void StopMonitoringItems(string serviceProgId, string groupId);
+        void StopMonitoringItems(string groupKey);
 
-        List<Item> ReadItemsValues(string serverID, List<string> items, string groupId, string strMd5);
+        List<Item> ReadItemsValues(string host, string serviceProgId, string groupKey);
 
-        void WriteValues(string serviceProgId, string groupId, Dictionary<string, object> itemValuePairs);
+        void WriteValues(string host, string serviceProgId, string groupKey, Dictionary<string, object> itemValuePairs);
     }
 
     public interface IItemsValueChangedCallBack
     {
-        void ValueChangedCallBack(string group, OpcDaItemValue[] values);
+        void ValueChangedCallBack(OpcDaGroup opcGroup, OpcDaItemValue[] values);
     }
 }

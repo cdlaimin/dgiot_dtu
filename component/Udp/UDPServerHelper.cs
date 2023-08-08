@@ -13,12 +13,9 @@ namespace Dgiot_dtu
 
     public class UDPServerHelper
     {
-        private const bool V = false;
         private static UDPServerHelper instance;
         private static NetManager server = null;
-        private static MainForm mainform = null;
         private static int port;
-        private static bool bIsRun = V;
         private static bool bIsCheck = false;
 
         public static UDPServerHelper Instance
@@ -34,11 +31,9 @@ namespace Dgiot_dtu
             }
         }
 
-        public static void Start(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Start()
         {
-            Config(config, mainform);
-            UDPServerHelper.mainform = mainform;
-
+            Config();
             if (bIsCheck)
             {
                 if (server == null)
@@ -67,7 +62,6 @@ namespace Dgiot_dtu
                     };
                 }
 
-                bIsRun = true;
                 while (!Console.KeyAvailable)
                 {
                     server.PollEvents();
@@ -85,23 +79,19 @@ namespace Dgiot_dtu
                     server.Stop();
                 }
             }
-
-            bIsRun = false;
         }
 
-        public static void Config(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Config()
         {
-            if (config["updServerPort"] != null)
+            port = int.Parse(ConfigHelper.GetConfig("DgiotPort"));
+            if (DgiotHelper.StrTobool(ConfigHelper.GetConfig("UDPClient_Checked")) && DgiotHelper.StrTobool(ConfigHelper.GetConfig("Bridge_Checked")))
             {
-                UDPServerHelper.port = int.Parse((string)config["UDPClientPort"].Value);
+                bIsCheck = true;
             }
-
-            if (config["updbridgeIsCheck"] != null)
+            else
             {
-                UDPServerHelper.bIsCheck = StringHelper.StrTobool(config["updbridgeIsCheck"].Value);
+                bIsCheck = false;
             }
-
-            UDPServerHelper.mainform = mainform;
         }
 
         public static void Write(byte[] data, int offset, int len)

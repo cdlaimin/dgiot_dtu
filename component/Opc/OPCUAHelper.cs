@@ -19,13 +19,9 @@ namespace Dgiot_dtu
         }
 
         private const string EndpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
-        private const bool V = false;
         private static ApplicationDescription localDescription;
         private static ICertificateStore certificateStore;
         private static OPCUAHelper instance;
-        private static MainForm mainform = null;
-        private static bool bIsRun = V;
-        private static bool bIsCheck = V;
         private static UaTcpSessionChannel channel;
 
         public static OPCUAHelper GetInstance()
@@ -38,10 +34,9 @@ namespace Dgiot_dtu
             return instance;
         }
 
-        public static void Start(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Start(KeyValueConfigurationCollection config)
         {
-            Config(config, mainform);
-            bIsRun = true;
+            Config(config);
             localDescription = new ApplicationDescription
             {
                 ApplicationName = "Workstation.UaClient.UnitTests",
@@ -60,21 +55,14 @@ namespace Dgiot_dtu
 
         public static void Stop()
         {
-            bIsRun = V;
             if (channel != null)
             {
                 Task.Run(async () => { await CloseAsync(); });
             }
         }
 
-        public static void Config(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Config(KeyValueConfigurationCollection config)
         {
-            if (config["OPCUAIsCheck"] != null)
-            {
-                bIsCheck = StringHelper.StrTobool(config["OPCUAIsCheck"].Value);
-            }
-
-            OPCUAHelper.mainform = mainform;
         }
 
         private static async Task ConnectAsync()

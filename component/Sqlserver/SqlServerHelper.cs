@@ -12,11 +12,7 @@ namespace Dgiot_dtu
         {
         }
 
-        private const bool V = false;
         private static SqlServerHelper instance;
-        private static MainForm mainform = null;
-        private static bool bIsRun = V;
-        private static bool bIsCheck = false;
 
         public static SqlServerHelper GetInstance()
         {
@@ -28,26 +24,17 @@ namespace Dgiot_dtu
             return instance;
         }
 
-        public static void Start(KeyValueConfigurationCollection config,  MainForm mainform)
+        public static void Start(KeyValueConfigurationCollection config)
         {
-            bIsRun = true;
-            Config(config, mainform);
-            SqlServerHelper.mainform = mainform;
+            Config(config);
         }
 
         public static void Stop()
         {
-            bIsRun = false;
         }
 
-        public static void Config(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Config(KeyValueConfigurationCollection config)
         {
-            if (config["SqlServerIsCheck"] != null)
-            {
-                SqlServerHelper.bIsCheck = StringHelper.StrTobool(config["SqlServerIsCheck"].Value);
-            }
-
-            SqlServerHelper.mainform = mainform;
         }
     }
 }

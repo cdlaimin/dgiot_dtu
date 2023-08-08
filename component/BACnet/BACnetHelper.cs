@@ -6,9 +6,9 @@ namespace Dgiot_dtu
 {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.IO.BACnet;
     using System.Linq;
+    using Newtonsoft.Json;
 
     public class BACnetHelper
     {
@@ -16,17 +16,13 @@ namespace Dgiot_dtu
         {
         }
 
-        private const bool V = false;
-        private static BACnetHelper instance;
+        private static BACnetHelper instance = null;
         private static BacnetClient bacnetClient = null;
 
         // All the present Bacnet Device List
         private static List<BacDevice> devicesList = new List<BacDevice>();
         private static int scanBatchStep = 5;
         private static byte invokeId = 0x00;
-
-        private static MainForm mainform = null;
-        private static bool bIsRun = V;
         private static bool bIsCheck = false;
 
         public static BACnetHelper GetInstance()
@@ -39,66 +35,57 @@ namespace Dgiot_dtu
             return instance;
         }
 
-        public static void Start(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Start()
         {
-            Config(config, mainform);
-            bIsRun = true;
-            if (bIsCheck)
+            Config();
+            Stop();
+            if (bacnetClient == null)
             {
-                if (bacnetClient == null)
-                {
-                    // Bacnet on UDP/IP/Ethernet
-                    bacnetClient = new BacnetClient(new BacnetIpUdpProtocolTransport(0xBAC0, false));
+                // Bacnet on UDP/IP/Ethernet
+                bacnetClient = new BacnetClient(new BacnetIpUdpProtocolTransport(0xBAC0, false));
 
-                    // or Bacnet Mstp on COM4 à 38400 bps, own master id 8
-                    // m_bacnet_client = new BacnetClient(new BacnetMstpProtocolTransport("COM4", 38400, 8);
-                    // Or Bacnet Ethernet
-                    // bacnetClient = new BacnetClient(new BacnetEthernetProtocolTransport("Connexion au réseau local"));
-                    // Or Bacnet on IPV6
-                    // bacnetClient = new BacnetClient(new BacnetIpV6UdpProtocolTransport(0xBAC0));
-                }
-
-                bacnetClient.OnIam += Handler_OnIam;
-                bacnetClient.Start();
-                bacnetClient.WhoIs();
-                mainform.Log("bacnetClient start IpUdpProtocol 0xBAC0: " + bacnetClient.ToString());
+                // or Bacnet Mstp on COM4 à 38400 bps, own master id 8
+                // m_bacnet_client = new BacnetClient(new BacnetMstpProtocolTransport("COM4", 38400, 8);
+                // Or Bacnet Ethernet
+                // bacnetClient = new BacnetClient(new BacnetEthernetProtocolTransport("Connexion au réseau local"));
+                // Or Bacnet on IPV6
+                // bacnetClient = new BacnetClient(new BacnetIpV6UdpProtocolTransport(0xBAC0));
             }
+
+            bacnetClient.OnIam += Handler_OnIam;
+            bacnetClient.Start();
+            bacnetClient.WhoIs();
+            LogHelper.Log("bacnetClient start IpUdpProtocol 0xBAC0: " + bacnetClient.ToString());
         }
 
         public static void Stop()
         {
-            bIsRun = false;
             if (bacnetClient != null)
             {
-               // bacnetClient.Start();
+                devicesList.Clear();
+                bacnetClient.Dispose();
+                bacnetClient = null;
             }
         }
 
-        public static void Config(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Config()
         {
-            if (config["BACnetIsCheck"] != null)
-            {
-                bIsCheck = StringHelper.StrTobool(config["BACnetIsCheck"].Value);
-            }
-
-            BACnetHelper.mainform = mainform;
         }
 
         public static void Write(byte[] data, int offset, int len)
         {
-            mainform.Log("bacnet write: " + bIsCheck.ToString());
-            if (bIsCheck)
-            {
+                LogHelper.Log("bacnet write: " + bIsCheck.ToString());
+
                 foreach (var device in devicesList)
                 {
                     var count = GetDeviceArrayIndexCount(device);
-                    mainform.Log("bacnet write: " + device.ToString() + " count: " + count.ToString());
+                    LogHelper.Log("bacnet write: " + device.ToString() + " count: " + count.ToString());
                     ScanPointsBatch(device, count);
                 }
 
                 foreach (var device in devicesList)
                 {
-                    System.IO.File.WriteAllText($"{device.DeviceId}.json", Newtonsoft.Json.JsonConvert.SerializeObject(device));
+                    System.IO.File.WriteAllText($"{device.DeviceId}.json", JsonConvert.SerializeObject(device));
                 }
 
                 foreach (var device in devicesList)
@@ -108,10 +95,9 @@ namespace Dgiot_dtu
 
                 foreach (var device in devicesList)
                 {
-                    System.IO.File.WriteAllText($"{device.DeviceId}pppp.json", Newtonsoft.Json.JsonConvert.SerializeObject(device));
-                    mainform.Log("bacnet device: " + Newtonsoft.Json.JsonConvert.SerializeObject(device).ToString());
+                    System.IO.File.WriteAllText($"{device.DeviceId}pppp.json", JsonConvert.SerializeObject(device));
+                    LogHelper.Log("bacnet device: " + JsonConvert.SerializeObject(device).ToString());
                 }
-            }
         }
 
         // 批量扫点,注意不要太多,超过maxAPDU失败
@@ -259,7 +245,7 @@ namespace Dgiot_dtu
                     foreach (var bValue in list)
                     {
                         var strBValue = "" + bValue.Value;
-                        mainform.Log(pid + " , " + strBValue + " , " + bValue.Tag);
+                        LogHelper.Log(pid + " , " + strBValue + " , " + bValue.Tag);
                         var strs = strBValue.Split(':');
                         if (strs.Length < 2)
                         {
@@ -277,7 +263,7 @@ namespace Dgiot_dtu
                 }
                 catch (Exception exp)
                 {
-                    mainform.Log("Error: " + index + " , " + exp.Message);
+                    LogHelper.Log("Error: " + index + " , " + exp.Message);
                 }
             }
         }
@@ -323,7 +309,7 @@ namespace Dgiot_dtu
                                 var pid = (BacnetPropertyIds)bPValue.property.propertyIdentifier;
                                 var bValue = bPValue.value.First();
                                 var strBValue = "" + bValue.Value;
-                                Console.WriteLine(pid + " , " + strBValue + " , " + bValue.Tag);
+                                LogHelper.Log(pid + " , " + strBValue + " , " + bValue.Tag);
                                 switch (pid)
                                 {
                                     case BacnetPropertyIds.PROP_DESCRIPTION: // 描述
@@ -351,7 +337,7 @@ namespace Dgiot_dtu
                 }
                 catch (Exception exp)
                 {
-                    Console.WriteLine("Error: " + exp.Message);
+                    LogHelper.Log("Error: " + exp.Message.ToString(), (int)LogHelper.Level.ERROR);
                 }
             }
         }
@@ -381,7 +367,7 @@ namespace Dgiot_dtu
                 }
 
                 devicesList.Insert(index, new BacDevice(adr, deviceId));
-                mainform.Log(@"Detect Device: " + deviceId);
+                LogHelper.Log(@"Detect Device: " + deviceId);
             }
         }
 

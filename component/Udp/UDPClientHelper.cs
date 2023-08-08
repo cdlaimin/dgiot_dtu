@@ -13,11 +13,9 @@ namespace Dgiot_dtu
     {
         private const bool V = false;
         private static UDPClientHelper instance;
-        private static MainForm mainform = null;
         private static NetManager client = null;
         private static string server = "prod.iotn2n.com";
         private static int port = 9050;
-        private static bool bIsRun = V;
         private static bool bIsCheck = false;
         private static bool bAutoReconnect = false;
 
@@ -31,11 +29,9 @@ namespace Dgiot_dtu
             return instance;
         }
 
-        public static void Start(KeyValueConfigurationCollection config, bool bAutoReconnect, MainForm mainform)
+        public static void Start()
         {
-            UDPClientHelper.bAutoReconnect = bAutoReconnect;
-            bIsRun = true;
-            Config(config, mainform);
+            Config();
 
             if (bIsCheck)
             {
@@ -69,28 +65,14 @@ namespace Dgiot_dtu
                     client.Stop();
                 }
             }
-
-            bIsRun = false;
         }
 
-        public static void Config(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Config()
         {
-            if (config["UDPClientServer"] != null)
-            {
-                UDPClientHelper.server = (string)config["UDPClientServer"].Value;
-            }
-
-            if (config["UDPClientPort"] != null)
-            {
-                UDPClientHelper.port = int.Parse((string)config["UDPClientPort"].Value);
-            }
-
-            if (config["UDPClientIsCheck"] != null)
-            {
-                UDPClientHelper.bIsCheck = StringHelper.StrTobool(config["UDPClientIsCheck"].Value);
-            }
-
-            UDPClientHelper.mainform = mainform;
+            server = ConfigHelper.GetConfig("DgiotSever");
+            port = int.Parse(ConfigHelper.GetConfig("DgiotPort"));
+            bIsCheck = DgiotHelper.StrTobool(ConfigHelper.GetConfig("UDPClientIsCheck"));
+            bAutoReconnect = DgiotHelper.StrTobool(ConfigHelper.GetConfig("ReconnectChecked"));
         }
 
         public static void Write(byte[] data, int offset, int len)

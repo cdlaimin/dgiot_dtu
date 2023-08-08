@@ -5,7 +5,6 @@
 namespace Dgiot_dtu
 {
     using System;
-    using System.Configuration;
     using System.IO.Ports;
 
     public class SerialPortHelper
@@ -16,9 +15,7 @@ namespace Dgiot_dtu
 
         private static SerialPort port = null;
         private static SerialPortHelper instance = null;
-        private static MainForm mainform = null;
         private static bool bIsRunning = false;
-        private static bool bIsCheck = false;
         private static string portName;
         private static int baudRate;
         private static Parity parity;
@@ -35,27 +32,30 @@ namespace Dgiot_dtu
             return instance;
         }
 
-        public static void Start(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Start()
         {
-            Config(config, mainform);
-            bIsRunning = true;
-            if (!bIsRunning)
-            {
-                try
-                {
-                    port = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
-                    port.DataReceived += Received;
-                    port.ReceivedBytesThreshold = 1;
-                    port.Open();
-                }
-                catch (Exception)
-                {
-                    mainform.Log(@"Couldn't open port " + portName);
-                    return;
-                }
+            Config();
 
-                bIsRunning = true;
+            if (bIsRunning)
+            {
+                Stop();
             }
+
+            try
+            {
+                port = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
+                port.DataReceived += Received;
+                port.ReceivedBytesThreshold = 1;
+                port.Open();
+                LogHelper.Log(@"Open open port " + portName);
+            }
+            catch (Exception)
+            {
+                LogHelper.Log(@"Couldn't open port " + portName);
+                return;
+            }
+
+            bIsRunning = true;
         }
 
         public static void Stop()
@@ -64,51 +64,26 @@ namespace Dgiot_dtu
             {
                 if (port.IsOpen)
                 {
+                    bIsRunning = false;
                     port.Close();
                 }
             }
         }
 
-        public static void Config(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Config()
         {
-            if (config["portName"] != null)
-            {
-                portName = (string)config["portName"].Value;
-            }
-
-            if (config["BaudRate"] != null)
-            {
-                baudRate = int.Parse((string)config["BaudRate"].Value);
-            }
-
-            if (config["DataBits"] != null)
-            {
-                dataBits = int.Parse((string)config["DataBits"].Value);
-            }
-
-            if (config["Parity"] != null)
-            {
-                parity = (Parity)StrToParity(config["Parity"].Value);
-            }
-
-            if (config["StopBits"] != null)
-            {
-                stopBits = StrToStopBits(config["StopBits"].Value);
-            }
-
-            if (config["SerialPortIsCheck"] != null)
-            {
-                bIsCheck = StringHelper.StrTobool(config["SerialPortIsCheck"].Value);
-            }
-
-            SerialPortHelper.mainform = mainform;
+            portName = ConfigHelper.GetConfig("SerialPort");
+            baudRate = int.Parse(ConfigHelper.GetConfig("BaudRate"));
+            dataBits = int.Parse(ConfigHelper.GetConfig("DataBits"));
+            parity = StrToParity(ConfigHelper.GetConfig("Parity"));
+            stopBits = StrToStopBits(ConfigHelper.GetConfig("StopBits"));
         }
 
         public static void Write(byte[] payload, int offset, int len)
         {
-            if (bIsCheck)
+            if (port != null && port.IsOpen)
             {
-                mainform.Log("S->N: " + mainform.Logdata(payload, 0, payload.Length));
+                // LogHelper.Log("SerialPort Send: [" + LogHelper.Logdata(payload, 0, len) + "]");
                 port.Write(payload, offset, len);
             }
         }
@@ -118,7 +93,8 @@ namespace Dgiot_dtu
             var rxlen = port.BytesToRead;
             var data = new byte[rxlen];
             port.Read(data, 0, rxlen);
-            mainform.Log("S->N: " + mainform.Logdata(data, 0, rxlen));
+            LogHelper.Log("SerialPort Recv: [" + LogHelper.Logdata(data, 0, rxlen) + "]");
+            TcpClientHelper.Write(data, 0, rxlen);
         }
 
         private static StopBits StrToStopBits(string s)

@@ -14,9 +14,6 @@ namespace Dgiot_dtu
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
-    using MQTTnet.Core;
-    using MQTTnet.Core.Client;
-    using MQTTnet.Core.Protocol;
     using Newtonsoft.Json;
 
     internal class AccessHelper
@@ -47,7 +44,6 @@ namespace Dgiot_dtu
              @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source='" + dbq + ";" +
                "Persist Security Info = False; Jet OLEDB:Database Password = " + pwd + ";";
 
-        private static MainForm mainform = null;
         private static bool bIsRunning = false;
         private static bool bIsCheck = false;
 
@@ -61,9 +57,9 @@ namespace Dgiot_dtu
             return instance;
         }
 
-        public static void Start(KeyValueConfigurationCollection config, bool bIsRunning, MainForm mainform)
+        public static void Start(KeyValueConfigurationCollection config, bool bIsRunning)
         {
-            Config(config, mainform);
+            Config(config);
             AccessHelper.bIsRunning = bIsRunning;
         }
 
@@ -72,23 +68,20 @@ namespace Dgiot_dtu
             AccessHelper.bIsRunning = false;
         }
 
-        public static void Config(KeyValueConfigurationCollection config, MainForm mainform)
+        public static void Config(KeyValueConfigurationCollection config)
         {
             if (config["AccessIsCheck"] != null)
             {
-                AccessHelper.bIsCheck = StringHelper.StrTobool(config["AccessIsCheck"].Value);
+               bIsCheck = DgiotHelper.StrTobool(config["AccessIsCheck"].Value);
             }
-
-            AccessHelper.mainform = mainform;
         }
 
-        public static void Check(bool isCheck, MainForm mainform)
+        public static void Check(bool isCheck)
         {
-            AccessHelper.bIsCheck = isCheck;
-            AccessHelper.mainform = mainform;
+            bIsCheck = isCheck;
         }
 
-        public static void Do_mdb(MqttClient mqttClient, string topic, Dictionary<string, object> json, string clientid, MainForm mainform)
+        public static void Do_mdb(string topic, Dictionary<string, object> json, string clientid)
         {
             Regex r_submdb = new Regex(topic); // 定义一个Regex对象实例
             Match m_submdb = r_submdb.Match(topic); // 在字符串中匹配
@@ -98,7 +91,7 @@ namespace Dgiot_dtu
             }
 
             string cmdType = "read";
-            AccessHelper.scantopic = "thing/mdb/" + clientid + "post";
+            scantopic = "thing/mdb/" + clientid + "post";
             if (json.ContainsKey("cmdtype"))
             {
                 try
@@ -107,15 +100,15 @@ namespace Dgiot_dtu
                     switch (cmdType)
                     {
                         case "scan":
-                            Scan_mdb(mqttClient, json);
+                            Scan_mdb(json);
                             break;
                         case "read":
-                            Read_mdb(mqttClient, json);
+                            Read_mdb(json);
                             break;
                         case "write":
                             break;
                         default:
-                            Read_mdb(mqttClient, json);
+                            Read_mdb(json);
                             break;
                     }
                 }
@@ -126,7 +119,7 @@ namespace Dgiot_dtu
             }
         }
 
-        public static void Scan_mdb(MqttClient mqttClient, Dictionary<string, object> json)
+        public static void Scan_mdb(Dictionary<string, object> json)
         {
             if (json.ContainsKey("dbq"))
             {
@@ -217,13 +210,12 @@ namespace Dgiot_dtu
 
                 dataSet.AcceptChanges();
                 var jsonResults = DataSetToJson(dataSet);
-                var appMsg = new MqttApplicationMessage(scantopic, Encoding.UTF8.GetBytes(jsonResults.ToString()), MqttQualityOfServiceLevel.AtLeastOnce, false);
-                mqttClient.PublishAsync(appMsg);
-                Console.WriteLine(jsonResults);
+                MqttClientHelper.Publish(scantopic, Encoding.UTF8.GetBytes(jsonResults.ToString()));
+                LogHelper.Log(jsonResults);
             }
         }
 
-        public static void Read_mdb(MqttClient mqttClient, Dictionary<string, object> json)
+        public static void Read_mdb(Dictionary<string, object> json)
         {
         }
 
